@@ -10,9 +10,9 @@ app.post('/api/add', (req, res) => {
 
     cnxn.execute('insert into briantools.yestful_routes (api_route, http_resp_body, user_id) values (?, ?, ?)', [api_route, req.resp_body, req.user], function(err, results, fields) {
       if(results.affectedRows > 0) {
-        res.send('Route Added')
+        res.send({'status': 1, 'api': api_route})
       } else {
-        res.send('Route Not Added')
+        res.send({'status': 0, 'api': ''})
       }
     })
     cnxn.end()
@@ -20,7 +20,7 @@ app.post('/api/add', (req, res) => {
 
 app.get('/api/:routeKey', (req, res) => {
   if (typeof req.params.routeKey === undefined) {
-    res.send('Route Missing')
+    res.send({'status': 0, 'body': '', 'msg': 'Route Missing'})
     return
   }
 
@@ -29,9 +29,9 @@ app.get('/api/:routeKey', (req, res) => {
   cnxn.query("select http_resp_body from briantools.yestful_routes where api_route = ?", [req.params.routeKey], function(err, results) {
 
     if(typeof results[0]['http_resp_body'] !== undefined) {
-      res.send(results[0]['http_resp_body'])
+      res.send({'status': 1, 'body': results[0]['http_resp_body']})
     } else {
-      res.send('Route Not Found')
+      res.send({'status': 0, 'body': '', 'msg': 'Route Not Found'})
     }
 
   })
@@ -40,7 +40,7 @@ app.get('/api/:routeKey', (req, res) => {
 
 app.get('/api/:routeKey/delete', (req, res) => {
   if (typeof req.params.routeKey === undefined) {
-    res.send('Route Missing')
+    res.send({'status': 0, 'msg': 'Route Missing'})
     return
   }
 
@@ -48,9 +48,9 @@ app.get('/api/:routeKey/delete', (req, res) => {
 
   cnxn.execute('update briantools.yestful_routes set active_status = "D" where api_route = ?', [req.params.routeKey], function(err, results, fields) {
     if(results.affectedRows > 0) {
-      res.send('Route Deleted')
+      res.send({'status': 1, 'msg': 'Route Deleted'})
     } else {
-      res.send('Route Not Found')
+      res.send({'status': 0, 'msg': 'Route Not Found'})
     }
   })
   cnxn.end()
